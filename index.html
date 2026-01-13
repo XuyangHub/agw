@@ -4,202 +4,363 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AGW | Anti-Gravity Waterfall Studio - 量化对冲与算法交易</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- 引入字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --text-color: #e0e0e0;
-            --accent-color: #007AFF; /* 科技蓝 */
-            --glass-bg: rgba(255, 255, 255, 0.03);
+            --bg-dark: #020202;
+            --accent-blue: #0084ff;
+            --accent-glow: rgba(0, 132, 255, 0.4);
+            --text-main: #f5f5f7;
+            --text-dim: #a1a1a6;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
             overflow-x: hidden;
         }
 
-        /* 极简背景动画 */
-        .background-glow {
+        /* 炫酷背景：动态粒子网格 */
+        #canvas-container {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #020202 100%);
+        }
+
+        /* 顶部装饰线 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            z-index: 1000;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 80px 20px;
+            padding: 0 40px;
         }
 
-        header {
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
-            margin-bottom: 100px;
         }
 
-        .logo {
-            font-size: 2.5rem;
+        .hero-logo {
+            font-size: clamp(2rem, 8vw, 4.5rem);
             font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #fff 30%, #555 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
 
-        .slogan {
+        .hero-slogan {
+            font-family: 'JetBrains Mono', monospace;
             font-size: 1.1rem;
-            font-weight: 300;
-            color: #888;
-            letter-spacing: 2px;
+            color: var(--accent-blue);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) 0.3s forwards;
         }
 
+        /* 内容板块样式 */
         section {
-            margin-bottom: 80px;
-            padding: 40px;
-            background: var(--glass-bg);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
+            padding: 120px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            color: var(--accent-color);
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 40px;
             display: flex;
             align-items: center;
+            gap: 15px;
         }
 
-        h2::before {
+        .section-title::after {
             content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--accent-color);
-            margin-right: 15px;
-            border-radius: 2px;
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
         }
 
-        p {
+        /* 介绍卡片 */
+        .intro-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 40px;
+        }
+
+        .intro-text {
+            font-size: 1.25rem;
             font-weight: 300;
-            color: #ccc;
+            color: var(--text-dim);
+            max-width: 800px;
         }
 
-        .business-lines {
+        .intro-text b {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* 业务卡片网格 */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 20px;
         }
 
         .card {
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 132, 255, 0.05);
+            transform: translateY(-5px);
         }
 
         .card h3 {
-            font-size: 1.1rem;
-            margin-top: 0;
-            color: #fff;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--text-main);
         }
 
-        .contact-box {
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* 联络区域 */
+        .contact-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            padding: 60px 20px;
         }
 
-        .btn-contact {
+        .cta-button {
             display: inline-block;
-            padding: 15px 40px;
-            background: var(--accent-color);
-            color: #fff;
+            padding: 20px 50px;
+            background: var(--accent-blue);
+            color: white;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        .btn-contact:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.3);
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .contact-details {
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
         }
 
         footer {
+            padding: 60px 0;
             text-align: center;
-            padding: 40px;
-            color: #555;
             font-size: 0.8rem;
+            color: #333;
+            border-top: 1px solid var(--glass-border);
         }
 
-        .contact-info {
-            margin-top: 20px;
-            color: #888;
+        /* 动画 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 600px) {
-            .container { padding: 40px 20px; }
-            .logo { font-size: 1.8rem; }
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .hero-logo { font-size: 3rem; }
+            .section-title { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="background-glow"></div>
+    <div class="top-bar"></div>
+    <div id="canvas-container">
+        <canvas id="bg-canvas"></canvas>
+    </div>
 
     <div class="container">
-        <header>
-            <div class="logo">AGW | ANTI-GRAVITY WATERFALL</div>
-            <div class="slogan">捕捉动能偏离 · 驾驭算法逻辑</div>
-        </header>
-
-        <section id="about">
-            <h2>工作室介绍</h2>
-            <p>
-                Anti-Gravity Waterfall (AGW) 工作室（中文名：反重力瀑布工作室）是一家专注于<b>量化对冲逻辑</b>与<b>算法交易解决方案</b>研发的专业工作室。
-            </p>
-            <p>
-                我们通过非线性博弈模型与风险自愈算法，致力于在复杂波动的全球金融市场中，构建具备“抗引力”特性的净值增长曲线。
-            </p>
-        </section>
-
-        <section id="services">
-            <h2>核心业务</h2>
-            <div class="business-lines">
-                <div class="card">
-                    <h3>旗舰级 EA 系统</h3>
-                    <p>Synergy 系列协同对冲引擎，专为黄金等高波动资产调优。</p>
-                </div>
-                <div class="card">
-                    <h3>量化工具定制</h3>
-                    <p>涵盖风险自愈、动态平衡线及自动风控等辅助交易模块。</p>
-                </div>
-                <div class="card">
-                    <h3>私域跟单信号</h3>
-                    <p>通过官方实盘观摩，体验算法逻辑带来的稳定复利。 </p>
-                </div>
-            </div>
-        </section>
-
-        <div class="contact-box">
-            <h2>建立连接</h2>
-            <p>如果您对我们的量化策略或产品感兴趣，欢迎咨询洽谈。</p>
-            <br>
-            <a href="mailto:your-email@example.com" class="btn-contact">联络工作室</a>
-            <div class="contact-info">
-                <p>微信 / Telegram: 请替换为您自己的联系信息</p>
-                <p>Website: anti-gravitywaterfall.com</p>
-            </div>
+        <!-- Hero -->
+        <div class="hero">
+            <h1 class="hero-logo">ANTI-GRAVITY WATERFALL</h1>
+            <p class="hero-slogan">Quant Algorithms & Hedge Systems</p>
         </div>
 
+        <!-- Introduction -->
+        <section id="about">
+            <h2 class="section-title">工作室介绍</h2>
+            <div class="intro-box">
+                <p class="intro-text">
+                    <b>AGW (反重力瀑布工作室)</b> 是一家专注于 <b>量化对冲逻辑</b> 与 <b>算法交易解决方案</b> 研发的专业工作室。
+                </p>
+                <br>
+                <p class="intro-text">
+                    我们不追随趋势，我们利用数学。通过自研的非线性博弈模型，在市场混沌中构建具备高韧性的资产溢价引擎。
+                </p>
+            </div>
+        </section>
+
+        <!-- Business Lines -->
+        <section id="business">
+            <h2 class="section-title">业务线</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>旗舰算法 EA</h3>
+                    <p>Synergy 双向协同引擎。基于 ATR 波动率自适应网格，内置 Self-Healing 风险自愈逻辑。</p>
+                </div>
+                <div class="card">
+                    <h3>量化风控工具</h3>
+                    <p>为专业交易人员提供动态成本线上色、盈亏预期推演等高精度视觉化辅助脚本。</p>
+                </div>
+                <div class="card">
+                    <h3>资产管理咨询</h3>
+                    <p>提供多资产配比压力测试、回撤控制方案审计，助力构建机构级交易基建设施。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="contact-section">
+            <h2 class="section-title">建立连接</h2>
+            <p style="color: var(--text-dim)">准备好体验算法的力量了吗？</p>
+            <a href="mailto:admin@anti-gravitywaterfall.com" class="cta-button">联络我们</a>
+            <div class="contact-details">
+                <p>E-Mail: agw@anti-gravitywaterfall.com</p>
+                <p>DOMAIN: anti-gravitywaterfall.com</p>
+            </div>
+        </section>
+
         <footer>
-            &copy; 2026 Anti-Gravity Waterfall Studio. All Rights Reserved.
+            &copy; 2026 ANTI-GRAVITY WATERFALL STUDIO. POWERED BY QUANT LOGIC.
         </footer>
     </div>
+
+    <!-- 粒子动画脚本 -->
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.speedY = Math.random() * 0.5 - 0.25; // 缓慢移动
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY; // 这里可以改为负值实现“反重力瀑布”上升效果
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 132, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // 滚动显示动画
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        createParticles();
+        animate();
+    </script>
 </body>
 </html>
