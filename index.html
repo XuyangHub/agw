@@ -3,364 +3,1002 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGW | Anti-Gravity Waterfall Studio - 量化对冲与算法交易</title>
-    <!-- 引入字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
+    <meta name="description" content="Anti-Gravity Waterfall - 专业MT4/MT5 EA智能交易系统研发与定制，量化交易策略自动化专家。">
+    <meta name="keywords" content="Anti-Gravity Waterfall, AGW, EA定制, MT4 EA, MT5 EA, 智能交易, 量化交易, 自动交易系统">
+    <meta name="theme-color" content="#000000">
+    <title>Anti-Gravity Waterfall | 领先的EA量化交易智能解决方案</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #020202;
-            --accent-blue: #0084ff;
-            --accent-glow: rgba(0, 132, 255, 0.4);
-            --text-main: #f5f5f7;
-            --text-dim: #a1a1a6;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #00ffff;
+            --primary-dim: rgba(0, 255, 255, 0.1);
+            --bg: #030712;
+            --bg-accent: #0f172a;
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+            --border: rgba(0, 255, 255, 0.15);
+            --card-bg: rgba(15, 23, 42, 0.4);
+            --font-heading: 'Lexend', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * {
+        html, body {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
             overflow-x: hidden;
+            width: 100%;
+            background: var(--bg);
         }
 
-        /* 炫酷背景：动态粒子网格 */
-        #canvas-container {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 炫酷动态背景容器 */
+        .bg-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #020202 100%);
+            background: var(--bg);
+            overflow: hidden;
         }
 
-        /* 顶部装饰线 */
-        .top-bar {
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-dim);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* 滚动进度条 */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: var(--primary);
+            z-index: 1001;
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.1s ease;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* 升级版反重力瀑布效果 */
+        #waterfall {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .water-drop {
+            position: fixed;
+            width: 1px;
+            background: linear-gradient(to top, transparent, var(--primary), #fff);
+            box-shadow: 0 0 15px var(--primary), 0 0 5px #fff;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50% 50% 0 0;
+            animation: riseUp linear infinite;
+        }
+
+        @keyframes riseUp {
+            0% {
+                transform: translateY(100vh) scaleY(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-20vh) scaleY(2);
+                opacity: 0;
+            }
+        }
+
+        /* 底部水蒸气/汇聚效果 */
+        .bottom-glow {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15vh;
+            background: linear-gradient(to top, rgba(0, 255, 255, 0.15), transparent);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(20px);
+        }
+
+        /* 导航栏 */
+        nav {
             position: fixed;
             top: 0;
             width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
-            z-index: 1000;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 40px;
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 100vh;
+            padding: 1.5rem 5%;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.4s ease;
         }
 
-        .hero-logo {
-            font-size: clamp(2rem, 8vw, 4.5rem);
-            font-weight: 700;
+        nav.scrolled {
+            padding: 1rem 5%;
+            background: rgba(3, 7, 18, 0.85); /* 匹配新的 --bg */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            font-family: var(--font-mono);
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 主要内容区域 */
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 5rem 5%;
+        }
+
+        /* Hero 区域 */
+        .hero {
+            text-align: center;
+            padding-top: 10vh;
+        }
+
+        .hero-title-cn {
+            font-family: var(--font-heading);
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            letter-spacing: 15px;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            margin-left: 15px; /* 平行补偿字间距 */
+            opacity: 0.9;
+            text-shadow: 0 0 15px var(--primary-dim);
+        }
+
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(3.5rem, 12vw, 9rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
             letter-spacing: -2px;
-            margin-bottom: 20px;
-            background: linear-gradient(180deg, #fff 30%, #555 100%);
+            background: linear-gradient(90deg, var(--primary) 0%, #fff 50%, var(--primary) 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            animation: shimmer 5s infinite;
         }
 
-        .hero-slogan {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-            color: var(--accent-blue);
-            letter-spacing: 4px;
+        .slogan-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .slogan-text {
+            font-family: var(--font-heading);
+            font-size: clamp(1.5rem, 4vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .slogan-divider {
+            width: 2px;
+            height: clamp(20px, 4vw, 40px);
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            transform: rotate(20deg);
+        }
+
+        .hero-desc {
+            font-family: var(--font-body);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 4rem auto;
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+
+        /* 流程区域 */
+        .process {
+            flex-direction: column;
+            background: rgba(0, 255, 255, 0.01);
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 4rem;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            position: relative;
+        }
+
+        .step-num {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-dim);
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            line-height: 1;
+        }
+
+        .step-card h4 {
+            font-family: var(--font-heading);
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
             text-transform: uppercase;
-            opacity: 0;
-            animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) 0.3s forwards;
+            letter-spacing: 1px;
         }
 
-        /* 内容板块样式 */
-        section {
-            padding: 120px 0;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+        .step-card p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
         }
 
-        section.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* 产品区域 */
+        .products {
+            flex-direction: column;
+            gap: 0;
         }
 
         .section-title {
-            font-size: 2rem;
-            margin-bottom: 40px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 5rem;
+            text-align: center;
+            color: var(--text);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .section-title::after {
             content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--glass-border);
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        /* 介绍卡片 */
-        .intro-box {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 40px;
-            border-radius: 24px;
-            backdrop-filter: blur(20px);
-            margin-bottom: 40px;
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1200px;
         }
 
-        .intro-text {
-            font-size: 1.25rem;
-            font-weight: 300;
+        .product-card {
+            padding: 3.5rem 2.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(0, 255, 255, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.1);
+            transform: translateY(-12px);
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .product-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .product-card p {
             color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .product-tag {
+            font-family: var(--font-mono);
+            align-self: flex-start;
+            padding: 0.4rem 1.2rem;
+            background: var(--primary-dim);
+            border: 1px solid var(--primary);
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* 关于区域 */
+        .about {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .about-content {
             max-width: 800px;
         }
 
-        .intro-text b {
-            color: var(--text-main);
-            font-weight: 600;
+        .about-content p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            line-height: 2;
         }
 
-        /* 业务卡片网格 */
-        .grid {
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4rem;
+            justify-content: center;
+            margin-top: 3rem;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 30px;
-            border-radius: 20px;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
+        .stat-item {
+            text-align: center;
         }
 
-        .card:hover {
-            border-color: var(--accent-blue);
-            background: rgba(0, 132, 255, 0.05);
-            transform: translateY(-5px);
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            line-height: 1;
         }
 
-        .card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: var(--text-main);
-        }
-
-        .card p {
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
             color: var(--text-dim);
-            font-size: 0.95rem;
+            margin-top: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* 联络区域 */
-        .contact-section {
-            display: flex;
+        /* 联系区域 */
+        .contact {
             flex-direction: column;
-            align-items: center;
             text-align: center;
         }
 
-        .cta-button {
-            display: inline-block;
-            padding: 20px 50px;
-            background: var(--accent-blue);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            margin: 30px 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        .cta-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px var(--accent-glow);
-        }
-
-        .contact-details {
+        .contact-info {
+            margin-top: 2rem;
+            font-size: 1.2rem;
             color: var(--text-dim);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
         }
 
+        .contact-info a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .contact-info a:hover {
+            text-shadow: 0 0 20px var(--primary);
+        }
+
+        /* Footer */
         footer {
-            padding: 60px 0;
+            padding: 2rem 5%;
             text-align: center;
-            font-size: 0.8rem;
-            color: #333;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 动画 */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 移动端菜单 */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
         }
 
-        /* 响应式 */
+        .menu-toggle span {
+            width: 25px;
+            height: 2px;
+            background: var(--primary);
+            transition: all 0.3s;
+        }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .container { padding: 0 20px; }
-            .hero-logo { font-size: 3rem; }
-            .section-title { font-size: 1.5rem; }
+            nav {
+                padding: 1rem 5%;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+                letter-spacing: 2px;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.98);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2.5rem;
+                transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border-left: 1px solid var(--border);
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .menu-toggle {
+                display: flex;
+                z-index: 1001;
+            }
+
+            .menu-toggle.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .menu-toggle.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+
+            .hero h1 {
+                font-size: clamp(3rem, 15vw, 5rem);
+                letter-spacing: -2px;
+            }
+
+            .hero-title-cn {
+                font-size: 0.9rem;
+                letter-spacing: 8px;
+                margin-left: 8px;
+                margin-bottom: 0.8rem;
+            }
+
+            .slogan-container {
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .slogan-text {
+                font-size: 1.2rem;
+                letter-spacing: 4px;
+            }
+
+            .hero-desc {
+                font-size: 0.85rem;
+                padding: 0 5%;
+                margin-bottom: 3rem;
+            }
+
+            .process-steps {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 3.5rem;
+                margin-top: 4rem;
+            }
+
+            .stat-number {
+                font-size: 3.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+                letter-spacing: 3px;
+            }
+
+            section {
+                padding: 4rem 6%;
+            }
+
+            .section-title {
+                margin-bottom: 3rem;
+            }
+
+            .contact-info {
+                font-size: 1rem;
+            }
+
+            .product-card {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .currency-pair,
+            .data-stream {
+                font-size: 0.65rem;
+                opacity: 0.1;
+            }
+        }
+
+        /* 针对超小屏幕优化 */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+            .nav-links {
+                width: 100%;
+            }
+            .cta-btn {
+                padding: 0.8rem 2rem;
+                width: 100%;
+            }
+        }
+
+        /* 滚动提示 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-hint span {
+            display: block;
+            width: 2px;
+            height: 40px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* 页面加载动画 */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-content {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 30px var(--primary);
+            animation: pulse 1.5s infinite;
+            letter-spacing: -1px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
-    <div class="top-bar"></div>
-    <div id="canvas-container">
-        <canvas id="bg-canvas"></canvas>
-    </div>
-
-    <div class="container">
-        <!-- Hero -->
-        <div class="hero">
-            <h1 class="hero-logo">ANTI-GRAVITY WATERFALL</h1>
-            <p class="hero-slogan">Quant Algorithms & Hedge Systems</p>
+    <!-- 加载屏幕 -->
+    <div class="loader">
+        <div class="loader-content">
+            <div style="font-size: 0.9rem; letter-spacing: 12px; margin-bottom: 15px; font-weight: 400; opacity: 0.8;">反重力瀑布</div>
+            <div>ANTI-GRAVITY WATERFALL</div>
         </div>
-
-        <!-- Introduction -->
-        <section id="about">
-            <h2 class="section-title">工作室介绍</h2>
-            <div class="intro-box">
-                <p class="intro-text">
-                    <b>AGW (反重力瀑布工作室)</b> 是一家专注于 <b>量化对冲逻辑</b> 与 <b>算法交易解决方案</b> 研发的专业工作室。
-                </p>
-                <br>
-                <p class="intro-text">
-                    我们不追随趋势，我们利用数学。通过自研的非线性博弈模型，在市场混沌中构建具备高韧性的资产溢价引擎。
-                </p>
-            </div>
-        </section>
-
-        <!-- Business Lines -->
-        <section id="business">
-            <h2 class="section-title">业务线</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>旗舰算法 EA</h3>
-                    <p>Synergy 双向协同引擎。基于 ATR 波动率自适应网格，内置 Self-Healing 风险自愈逻辑。</p>
-                </div>
-                <div class="card">
-                    <h3>量化风控工具</h3>
-                    <p>为专业交易人员提供动态成本线上色、盈亏预期推演等高精度视觉化辅助脚本。</p>
-                </div>
-                <div class="card">
-                    <h3>资产管理咨询</h3>
-                    <p>提供多资产配比压力测试、回撤控制方案审计，助力构建机构级交易基建设施。</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact -->
-        <section id="contact" class="contact-section">
-            <h2 class="section-title">建立连接</h2>
-            <p style="color: var(--text-dim)">准备好体验算法的力量了吗？</p>
-            <a href="mailto:admin@anti-gravitywaterfall.com" class="cta-button">联络我们</a>
-            <div class="contact-details">
-                <p>E-Mail: agw@anti-gravitywaterfall.com</p>
-                <p>DOMAIN: anti-gravitywaterfall.com</p>
-            </div>
-        </section>
-
-        <footer>
-            &copy; 2026 ANTI-GRAVITY WATERFALL STUDIO. POWERED BY QUANT LOGIC.
-        </footer>
     </div>
 
-    <!-- 粒子动画脚本 -->
+    <!-- 炫酷背景 -->
+    <div class="bg-container">
+    </div>
+
+    <!-- 底部环境光 -->
+    <div class="bottom-glow"></div>
+
+    <!-- 滚动进度条 -->
+    <div id="scroll-progress"></div>
+
+    <!-- 反重力瀑布 -->
+    <canvas id="waterfall"></canvas>
+    <div id="water-drops"></div>
+
+    <!-- 导航栏 -->
+    <nav id="navbar">
+        <div class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">AGW</div>
+        <div class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home">首页</a></li>
+            <li><a href="#about">品牌哲学</a></li>
+            <li><a href="#contact">联系我们</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-title-cn">反重力瀑布</div>
+            <h1>ANTI-GRAVITY WATERFALL</h1>
+            <div class="slogan-container">
+                <span class="slogan-text">逆势升腾</span>
+                <span class="slogan-divider"></span>
+                <span class="slogan-text">破引而为</span>
+            </div>
+            <p class="hero-desc">在金融重力的洪流中，我们以算法为动力，捕捉每一份向上的确定性。</p>
+            <a href="#about" class="cta-btn">了解品牌哲学</a>
+        </div>
+        <div class="scroll-hint">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="about">
+        <h2 class="section-title">逆势升腾 · 破引而为</h2>
+        <div class="about-content">
+            <p style="text-align: left; margin-bottom: 3rem;">
+                在金融市场的浩瀚洪流中，大多数力量受限于“重力”——那种由恐慌、贪婪和盲从构成的下坠引力。
+                <br><br>
+                <strong>“Anti-Gravity Waterfall”</strong> 是我们的品牌全称，也是我们的核心哲学符号：它象征着我们的算法不随波逐流，而是像违背物理常识的水流一样，由低向高，逆势而进。
+                <br><br>
+                我们相信，真正的量化不仅是代码的堆砌，更是对引力的突破。通过严谨的数学模型，我们为每一位投资者构建抵御市场下坠的动力，实现财富与逻辑的共同升腾。
+            </p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">交付策略</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1k+</div>
+                    <div class="stat-label">回测模型</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">运行监控</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系区域 -->
+    <section id="contact" class="contact">
+        <h2 class="section-title">开启量化之旅</h2>
+        <div class="contact-info">
+            <p style="margin-bottom: 2rem; color: #fff;">如果您有成熟的策略需要实现，或对我们的核心系统感兴趣：</p>
+            <p>商务邮箱：<a href="mailto:contact@agw-studio.com">contact@agw-studio.com</a></p>
+            <p>Telegram咨询：<span style="color: var(--primary);">AGW_Studio</span></p>
+            <p style="font-size: 0.8rem; margin-top: 2rem; opacity: 0.5;">风险提示：量化交易涉及风险，过去表现不代表未来收益。</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Anti-Gravity Waterfall. All rights reserved.</p>
+    </footer>
+
     <script>
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+        // 升级版反重力瀑布引擎
+        const waterfallCanvas = document.getElementById('waterfall');
+        const wCtx = waterfallCanvas.getContext('2d');
+        let wParticles = [];
 
-        function initCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5;
-                this.speedY = Math.random() * 0.5 - 0.25; // 缓慢移动
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.opacity = Math.random() * 0.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY; // 这里可以改为负值实现“反重力瀑布”上升效果
-                if (this.y < 0) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = 0;
-            }
-            draw() {
-                ctx.fillStyle = `rgba(0, 132, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+        function initWaterfall() {
+            waterfallCanvas.width = window.innerWidth;
+            waterfallCanvas.height = window.innerHeight;
+            wParticles = [];
+            const count = window.innerWidth < 768 ? 40 : 100;
+            for (let i = 0; i < count; i++) {
+                wParticles.push({
+                    x: Math.random() * waterfallCanvas.width,
+                    y: Math.random() * waterfallCanvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speed: Math.random() * 3 + 1,
+                    length: Math.random() * 100 + 50,
+                    opacity: Math.random() * 0.5 + 0.1
+                });
             }
         }
 
-        function createParticles() {
-            for (let i = 0; i < 100; i++) {
-                particles.push(new Particle());
-            }
-        }
+        function drawWaterfall() {
+            wCtx.clearRect(0, 0, waterfallCanvas.width, waterfallCanvas.height);
+            // 使用叠加模式增加发光感
+            wCtx.globalCompositeOperation = 'lighter';
+            
+            wParticles.forEach(p => {
+                const grad = wCtx.createLinearGradient(p.x, p.y, p.x, p.y + p.length);
+                grad.addColorStop(0, `rgba(0, 255, 255, ${p.opacity})`);
+                grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                
+                wCtx.strokeStyle = grad;
+                wCtx.lineWidth = p.size;
+                wCtx.lineCap = 'round';
+                wCtx.beginPath();
+                wCtx.moveTo(p.x, p.y);
+                wCtx.lineTo(p.x, p.y + p.length);
+                wCtx.stroke();
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+                // 核心高亮线
+                wCtx.strokeStyle = `rgba(255, 255, 255, ${p.opacity * 0.5})`;
+                wCtx.lineWidth = p.size / 3;
+                wCtx.beginPath();
+                wCtx.moveTo(p.x, p.y);
+                wCtx.lineTo(p.x, p.y + p.length * 0.5);
+                wCtx.stroke();
+
+                p.y -= p.speed;
+                if (p.y < -p.length) {
+                    p.y = waterfallCanvas.height + p.length;
+                    p.x = Math.random() * waterfallCanvas.width;
+                    p.speed = Math.random() * 3 + 1;
+                }
             });
-            requestAnimationFrame(animate);
+
+            requestAnimationFrame(drawWaterfall);
         }
 
-        // 滚动显示动画
-        const observerOptions = { threshold: 0.1 };
+        initWaterfall();
+        drawWaterfall();
+
+        // 创建 DOM 水滴 (增强型)
+        const waterDropsContainer = document.getElementById('water-drops');
+        function createDrop() {
+            const drop = document.createElement('div');
+            drop.className = 'water-drop';
+            const left = Math.random() * 100;
+            const height = Math.random() * 100 + 100;
+            const duration = Math.random() * 2 + 2;
+            
+            drop.style.left = left + '%';
+            drop.style.height = height + 'px';
+            drop.style.width = (Math.random() * 2 + 1) + 'px';
+            drop.style.animationDuration = duration + 's';
+            
+            waterDropsContainer.appendChild(drop);
+            setTimeout(() => drop.remove(), duration * 1000);
+        }
+
+        setInterval(createDrop, window.innerWidth < 768 ? 400 : 150);
+
+        // 导航栏滚动效果 & 进度条
+        const navbar = document.getElementById('navbar');
+        const progressBar = document.getElementById('scroll-progress');
+        
+        window.addEventListener('scroll', () => {
+            // 导航栏
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // 进度条
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + "%";
+        });
+
+        // 窗口resize处理
+        window.addEventListener('resize', () => {
+            initWaterfall();
+        });
+
+        // 移动端菜单
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // 点击链接关闭菜单
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
                 }
             });
         }, observerOptions);
 
-        document.querySelectorAll('section').forEach(section => {
-            observer.observe(section);
+        document.querySelectorAll('.product-card, .stat-item, .step-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            observer.observe(el);
         });
 
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
-        createParticles();
-        animate();
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loader').classList.add('hidden');
+            }, 500);
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80; // 导航栏高度
+                    const bodyRect = document.body.getBoundingClientRect().top;
+                    const elementRect = target.getBoundingClientRect().top;
+                    const elementPosition = elementRect - bodyRect;
+                    const offsetPosition = elementPosition - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
     </script>
 </body>
 </html>
